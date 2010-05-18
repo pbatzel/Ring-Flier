@@ -8,21 +8,21 @@ const float Ring::RELAX_TIME=3;
 const float Ring::KILL_RADIUS=500.0f;
 Ring::Ring(Ogre::String name, RingFlyer* flyer):flyer(flyer)
 {
-	std::cout << "inside new ring"<< std::endl;
+	//std::cout << "inside new ring"<< std::endl;
 	position.x=(rand()%5000);
 	
 	position.z=(rand()%5000);
 	//position.y=flyer->getTerrainHeightAt(position.x,position.z)+15.0f;
 	position.y=(rand()%500)+flyer->getTerrainHeightAt(position.x,position.z)+100.0f;
-	std::cout << "set ring pos" << name << std::endl;
+	//std::cout << "set ring pos" << name << std::endl;
 
 	//Ogre::SceneNode* hello = flyer->getSceneManager()->getRootSceneNode();
 	//->createChildSceneNode("hello"+name);
 		//std::cout << "got root"<< hello << std::endl;
 	Ogre::SceneNode* sn = flyer->getSceneManager()->getRootSceneNode()->createChildSceneNode("sn"+name);
-	std::cout << "created sceneNode"<< std::endl;
+	//std::cout << "created sceneNode"<< std::endl;
 		Ogre::Entity* ring = flyer->getSceneManager()->createEntity(name,"Torus.mesh");
-		std::cout << "set ring name"<< std::endl;
+		//std::cout << "set ring name"<< std::endl;
 		//ring->setMaterialName("ring");
 		sn->attachObject(ring);
 		sn->scale(Ogre::Vector3(015.10f,015.10f,015.10f));

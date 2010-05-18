@@ -16,7 +16,7 @@ Ship::Ship(RingFlyer* flyer):flyer(flyer)
 		shipNode->setVisible(true);
 		shipNode->showBoundingBox(true);
 		//shipNode->setInheritOrientation(false);
-		shipNode->setOrientation(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-90)),Ogre::Vector3::UNIT_X));
+		//shipNode->setOrientation(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-90)),Ogre::Vector3::UNIT_X));
 		
 }
 Ogre::Vector3 shipPosition;

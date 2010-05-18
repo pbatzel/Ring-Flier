@@ -193,11 +193,14 @@ bool RingFlyerFrameListener::frameStarted(const Ogre::FrameEvent& event) {
 	}
 	//std::cout << "outside level press"<< std::endl;
 	int i;
-	/*for(i=0;i<enNum;i++){									//THIS GUY WAS BREAKING EVERYTHING
-		if (!flyer->e[i]->update(dt)){
+	for(i=0;i<enNum;i++){									//THIS GUY WAS BREAKING EVERYTHING
+		/*if (!flyer->e[i]->update(dt)){
+			std::cout << "DEATH"<< std::endl;
 			dead=true;
-		}
-	}*/
+		}*/
+		flyer->e[i]->update(dt);
+	}
+	
 	//std::cout << "return true"<< std::endl;
 	return true;
 }
