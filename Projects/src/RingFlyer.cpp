@@ -1,5 +1,5 @@
 // RingFlyer.cpp
-// @author Eric D. Wills
+
 
 #include "../Level.h"
 #include "RingFlyer.h"
@@ -178,10 +178,11 @@ void RingFlyer::createNextLevel(int x){
 	cameraNode->attachObject(camera);
 	//std::cout << "attached"<< std::endl;
 
-	delete frameListener;
+	/*delete frameListener;
 	frameListener = new RingFlyerFrameListener(this,ship); //this was a quick fix...could not delete and then just make a setShip() or something
 
-	root->addFrameListener(frameListener);
+	root->addFrameListener(frameListener);*/
+	frameListener->setShip(ship);
 
 }
 Ogre::Vector3 RingFlyer::getShipPosition(){

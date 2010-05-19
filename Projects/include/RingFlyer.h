@@ -1,5 +1,5 @@
 // RingFlyer.h
-// @author Eric D. Wills
+
 
 #ifndef __RING_FLYER_H__
 #define __RING_FLYER_H__

@@ -66,6 +66,7 @@ bool Ring::update(float elapsedTime){
 		//Ring::moveTowards(flyer->getCamera()->getPosition(),Ring::CHASE_VELOCITY,elapsedTime);
 		//Ring::chaseTime=Ring::RELAX_TIME;
 		flyer->getSceneManager()->getEntity(sphereName)->setMaterialName("Active_Sphere");
+		//std::cout << "DEATH "<<sphereName<< std::endl;
 	}
 	else if(chaseTime>0.0){
 		//Ring::moveTowards(flyer->getCamera()->getPosition(),Ring::CHASE_VELOCITY,elapsedTime);

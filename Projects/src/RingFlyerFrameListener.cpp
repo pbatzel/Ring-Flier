@@ -1,5 +1,5 @@
 // RingFlyerFrameListener.cpp
-// @author Eric D. Wills
+
 
 #include "RingFlyerFrameListener.h"
 #include "RingFlyer.h"
@@ -33,13 +33,16 @@ levelKeyPressed(false),dead(false),enNum(50),frameShipPosition(Ogre::Vector3::ZE
 	keyboard = static_cast<OIS::Keyboard*>(inputManager->createInputObject(OIS::OISKeyboard, true));
 	keyboard->setEventCallback(this);
 	keyboard->capture();
-	
+	showDebugOverlay(true);
 }
 
 RingFlyerFrameListener::~RingFlyerFrameListener() {
 	inputManager->destroyInputObject(mouse);
 	inputManager->destroyInputObject(keyboard);
 	OIS::InputManager::destroyInputSystem(inputManager);
+}
+void RingFlyerFrameListener::setShip(Ship* ship){
+	this->ship = ship;
 }
 
 bool RingFlyerFrameListener::frameStarted(const Ogre::FrameEvent& event) {
@@ -49,7 +52,7 @@ bool RingFlyerFrameListener::frameStarted(const Ogre::FrameEvent& event) {
 	mouse->capture();
 	keyboard->capture();
 
-
+	updateStats();
 	float dt = event.timeSinceLastFrame;
 	//flyer->ship->setPostion(flyer->ship->getPostion().x+20.0f*dt,flyer->ship->getPostion().y,flyer->ship->getPostion().z);
 	/*
