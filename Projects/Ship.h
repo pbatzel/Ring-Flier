@@ -1,4 +1,4 @@
-//#pragma once
+
 #ifndef __SHIP_H__
 #define __SHIP_H__
 #include "Ogre.h"

@@ -17,15 +17,15 @@ Ogre::Vector3 frameShipPosition;
 int l =0;
 float timeLeft=100.0f;
 int score=0;
-//int enNum=50;
 
+//Preconstruct a TON of stuff...
 RingFlyerFrameListener::RingFlyerFrameListener(RingFlyer* flyer,Ship* ship,SoundManager* soundMgr) :
 flyer(flyer), renderWindow(flyer->getRenderWindow()), camera(flyer->getCamera()), cameraTranslate(Ogre::Vector3::ZERO), cameraPitchIncrement(0.0f), cameraYawIncrement(0.0f), forwardKeyDown(false),
 backKeyDown(false), leftKeyDown(false), rightKeyDown(false), shutdownKeyPressed(false), shiftKeyDown(false), spaceKeyPressed(false),
 levelKeyPressed(false),incSpeedKeyDown(false),decSpeedKeyDown(false),maxSpeedKeyDown(false),dead(false),enNum(50),frameShipPosition(Ogre::Vector3::ZERO),ship(ship), soundMgr(soundMgr){
+	
 	size_t windowHandle;
 	renderWindow->getCustomAttribute("WINDOW", &windowHandle);
-
 	inputManager = OIS::InputManager::createInputSystem(windowHandle);
 
 	mouse = static_cast<OIS::Mouse*>(inputManager->createInputObject(OIS::OISMouse, true));
@@ -45,6 +45,7 @@ RingFlyerFrameListener::~RingFlyerFrameListener() {
 	inputManager->destroyInputObject(keyboard);
 	OIS::InputManager::destroyInputSystem(inputManager);
 }
+//Just to save a new ship here
 void RingFlyerFrameListener::setShip(Ship* ship){
 	this->ship = ship;
 }
@@ -56,196 +57,102 @@ bool RingFlyerFrameListener::frameStarted(const Ogre::FrameEvent& event) {
 	mouse->capture();
 	keyboard->capture();
 	float t2;
-
-
 	float dt = event.timeSinceLastFrame;
-	if (dead){
-		//t2=0.0f;
-		//flyer->getSceneManager()->setFog(Ogre::FOG_LINEAR, Ogre::ColourValue(0.93f, 0.0f, 0.0f),0.001f,5.0f,100.0f);
-		
+	//If you run out of time you die
+	if(timeLeft<=0.0f){ 
+		dead=true;
+	}
 
-		//updateTime(t2);
+	//Copy of the camera vector
+	Ogre::Vector3 camera2 = camera->getPosition();
+	float height = flyer -> getTerrainHeightAt(camera2.x,camera2.z);
+
+	frameShipPosition=ship->getPosition();
+	//If we want to not fly through part of the ground before we die we'll have to check in the !dead block below after we add the forward vel but before we set position
+	//If the ship's x coord is out of the range of the map (5000 hard coded) then you die. 
+	if ((frameShipPosition.x<0||frameShipPosition.x>5000||frameShipPosition.z<0||frameShipPosition.z>5000)&&!dead&&(l%3)!=0){
+		dead=true;
+		flyer->explosion();
+		//Failure audio stuff
+		unsigned int audioId2;		
+		soundMgr->loadAudio( "Explosion.wav", &audioId2, false);
+		soundMgr->playAudio( audioId2, true);
+	}	
+	//Else if you fly into the ground, you die.
+	else if((frameShipPosition.y < flyer->getTerrainHeightAt(frameShipPosition.x,frameShipPosition.z)+2.0)&&!dead && (l%3)!=0){
+		dead=true;
+		flyer->deadEffect();
+		unsigned int audioId2;		
+		soundMgr->loadAudio( "Explosion.wav", &audioId2, false);
+		soundMgr->playAudio( audioId2, true);
+		//soundMgr->stopAudio(0);	//Why does this kill everything?  No one knows.
 		
 	}
 
+	//if we haven't died yet
 	if (!dead){
+		//update the gui first
 		timeLeft-=dt;
 		t2=timeLeft*100.0f;
 		int t=t2;
 		t2=t/100.0f;
 		updateTime(t2);
-	}
-	if(timeLeft<=0.0f){
 
-		dead=true;
-
-	}
-	
-
-	//flyer->ship->setPostion(flyer->ship->getPostion().x+20.0f*dt,flyer->ship->getPostion().y,flyer->ship->getPostion().z);
-	/*
-	if (cameraPitchIncrement != 0.0f) {
-	cameraPitch -= ROTATION_INCREMENT*dt*cameraPitchIncrement;
-	//std::cout << cameraPitch << " \n";
-
-	if (cameraPitch < -Ogre::Math::PI/2)
-	cameraPitch= -Ogre::Math::PI/2;
-
-	else if (cameraPitch > Ogre::Math::PI/2)
-	cameraPitch= Ogre::Math::PI/2;
-
-
-	cameraPitchIncrement = 0.0f;
-
-	}
-	if (cameraYawIncrement != 0.0f) {
-	cameraYaw -= ROTATION_INCREMENT*dt*cameraYawIncrement;
-
-	cameraYawIncrement = 0.0f;
-	}
-	*/
-	// camera->pitch(Ogre::Radian(cameraPitch*dt/100.0f));
-	// camera->yaw(Ogre::Radian(cameraYaw*dt/100.0f));
-	//camera->setOrientation(Ogre::Quaternion(Ogre::Radian(cameraYaw), Ogre::Vector3::UNIT_Y)*
-	//                  Ogre::Quaternion(Ogre::Radian(cameraPitch), Ogre::Vector3::UNIT_X));
-
-	if (!dead){
+		//Update the camera pitch/roll
 		if (forwardKeyDown){
-			//cameraTranslate.z = -TRANSLATION_INCREMENT*dt;
 			cameraPitch+=ROTATION_INCREMENT*dt;
-			//camera->pitch(Ogre::Radian(cameraPitch));
-			//ship->setOrientation(cameraPitch,roll);
 		}
-		//else{
-		//	cameraPitch=0.0f;
-		//}
-
+		//Can't hold back and forward down at once.
 		else if (backKeyDown){
-			// cameraTranslate.z = TRANSLATION_INCREMENT*dt;
 			cameraPitch-=ROTATION_INCREMENT*dt;
-			//camera->pitch(Ogre::Radian(cameraPitch));
-			//ship->setOrientation(cameraPitch,roll);
 		}
-		//else{
-		//cameraPitch=0.0f;
-		//}
 		if (leftKeyDown){
-			//  cameraTranslate.x = -TRANSLATION_INCREMENT*dt;
 			roll-=ROTATION_INCREMENT*dt;
-			//camera->roll(Ogre::Radian(roll));
-			//ship->setOrientation(cameraPitch,roll);
 		}
-		//else{
-		//roll=0.0f;
-		//}
 		if (rightKeyDown){
 			roll+=ROTATION_INCREMENT*dt;
-			//camera->roll(Ogre::Radian(roll));
-			//ship->setOrientation(cameraPitch,roll);
 		}
+		//Set the ships orientation to the camera's while it's not dead.
 		ship->setOrientation(cameraPitch,roll);
-		//else{
-		//roll=0.0f;
-		//}
-		if (!dead){
-			cameraPitch=0.0f;
-			roll=0.0f;
-			frameShipPosition=ship->getPosition();
-			ship->setPosition(Ogre::Vector3(0.0f,0.0f,FORWARD_VELOCITY*dt));
-		}
-		// cameraTranslate.x = TRANSLATION_INCREMENT*dt;
-		//	if (shiftKeyDown){
-		//		cameraTranslate*=2;
-		//	}
 
-
-
-
-
-		//	cameraTranslate.z=-FORWARD_VELOCITY*dt;
-		//cameraTranslate.z=-10*dt;
+		cameraPitch=0.0f;
+		roll=0.0f;
+		//frameShipPosition=ship->getPosition();
+		ship->setPosition(Ogre::Vector3(0.0f,0.0f,FORWARD_VELOCITY*dt));
 		frameShipPosition=ship->getPosition();
-		//std::cout<<frameShipPosition << std::endl;
-
-		//std::cout<<ship->getPosition()<<std::endl;
-		//ship->setPosition(Ogre::Vector3(frameShipPosition.x,frameShipPosition.y,frameShipPosition.z-FORWARD_VELOCITY*dt));
-
-		//flyer->getSceneManager()->getSceneNode("cameraNode")->translate(camera->getPosition()-flyer->getSceneManager()->getSceneNode("cameraNode")->getPosition()*0.1f);
-		//camera->moveRelative(cameraTranslate);
+	
+	
 	}
-	//copy of the camera vector
-	Ogre::Vector3 camera2 = camera->getPosition();
-	float height = flyer -> getTerrainHeightAt(camera2.x,camera2.z);
+	//Start of things we always do.
 
-	/*
-	if (spaceKeyPressed && jumpVelocity ==0.0f){
-	jumpVelocity = 10.0f;
-	}
-
-
-	if (jumpVelocity != 0.0f){
-	jumpVelocity += gravity*dt*1.5;
-	camera2.y+=jumpVelocity/100;
-	}
-	if (camera2.y<=(height+15.0f)){
-	jumpVelocity = 0.0f;
-	}
-	*/
-	// std::cout << camera2.x << " " << camera2.y << " " << camera2.z << "\n";
-	frameShipPosition=ship->getPosition();
-	if ((frameShipPosition.x<0||frameShipPosition.x>5000||frameShipPosition.z<0||frameShipPosition.z>5000)&&!dead &&(l%3)!=0){
-		dead=true;
-		flyer->explosion();
-		unsigned int audioId2;
-		//std::cout << "attempting to load Explosion.wav as " << audioId2 << " \n";
-		
-		soundMgr->loadAudio( "Explosion.wav", &audioId2, false);
-		soundMgr->playAudio( audioId2, true);
-	}
-
-
-
-	if((frameShipPosition.y< flyer->getTerrainHeightAt(frameShipPosition.x,frameShipPosition.z)+2.0)&&!dead && (l%3)!=0){
-		dead=true;
-		flyer->deadEffect();
-		unsigned int audioId2;
-		//std::cout << "attempting to load Explosion.wav as " << audioId2 << " \n";
-		
-		soundMgr->loadAudio( "Explosion.wav", &audioId2, false);
-		soundMgr->playAudio( audioId2, true);
-		//soundMgr->stopAudio(0);	
-		
-	}
-	if (flyer->getTerrainHeightAt(camera->getPosition().x,camera->getPosition().z)+15.0f >= camera->getPosition().y){
+	//If we wanted to be stuck 15 units above the terrain no matter what for some reason...
+	/*if (flyer->getTerrainHeightAt(camera->getPosition().x,camera->getPosition().z)+15.0f >= camera->getPosition().y){
 		//flyer->adjustCameraHeightToTerrain();
-	}
+	}*/
 
+	//If they pressed F1 to go to the next level set some stuff up.
 	if (levelKeyPressed){
 		l=(l+1)%3;
 		int oldNum=enNum;
 		if (l==0)
 			enNum=50;
-		if (l==1)
+		else if (l==1)
 			enNum=100;
-		if (l==2)
+		else if (l==2)
 			enNum=200;
 		flyer->createNextLevel(l);
 		timeLeft=100.0f;
 		dead=false;
 		score=0;
 	}
-	//std::cout << "outside level press"<< std::endl;
-	int i;
-	for(i=0;i<enNum;i++){									//THIS GUY WAS BREAKING EVERYTHING
-		/*if (!flyer->e[i]->update(dt)){
-		std::cout << "DEATH"<< std::endl;
-		dead=true;
-		}*/
-		score+=flyer->e[i]->update(dt);
-		
-		updateScore(score);
 
+	int i;
+	for(i=0;i<enNum;i++){ //For all the rings, call the update and increase the score if it went through a ring.
+		score+=flyer->e[i]->update(dt);		
+		updateScore(score);
 	}
+
+	//Some speed stuff
 	if(incSpeedKeyDown && (FORWARD_VELOCITY < 400.0f)){
 		FORWARD_VELOCITY +=100*dt;
 	}
@@ -253,29 +160,23 @@ bool RingFlyerFrameListener::frameStarted(const Ogre::FrameEvent& event) {
 		20.0f) ){
 			FORWARD_VELOCITY -=100*dt;
 	}
-
 	if(maxSpeedKeyDown){
 		FORWARD_VELOCITY = 400.0f;
 		maxSpeedKeyDown = false;
 	}
-	//std::cout << "return true"<< std::endl;
 	return true;
 }
-//docs/manual/entities
-//need a scenenode and entity for each sphere
 
 bool RingFlyerFrameListener::frameEnded(const Ogre::FrameEvent& event) { return true; }
-
 bool RingFlyerFrameListener::mousePressed(const OIS::MouseEvent& event, OIS::MouseButtonID buttonID) { return true; }
 bool RingFlyerFrameListener::mouseReleased(const OIS::MouseEvent& event, OIS::MouseButtonID buttonID) { return true; }
-
 bool RingFlyerFrameListener::mouseMoved(const OIS::MouseEvent& event) {
 	cameraPitchIncrement = event.state.Y.rel;
 	cameraYawIncrement   = event.state.X.rel;
-
 	return true;
 }
 
+//Key pressed stuff
 bool RingFlyerFrameListener::keyPressed(const OIS::KeyEvent& event) {
 	switch (event.key) {
   case OIS::KC_W:
@@ -290,33 +191,31 @@ bool RingFlyerFrameListener::keyPressed(const OIS::KeyEvent& event) {
   case OIS::KC_D:
 	  rightKeyDown = true;
 	  break;
+
   case OIS::KC_ESCAPE:
 	  shutdownKeyPressed = true;
 	  break;
-
-  case OIS::KC_SPACE:
+  case OIS::KC_SPACE://Pretty sure we don't use this?
 	  spaceKeyPressed = true;
 	  break;
   case OIS::KC_F1:
 	  levelKeyPressed =true;
 	  break;
-
   case OIS::KC_LSHIFT:
 	  incSpeedKeyDown=true;
 	  break;
   case OIS::KC_LCONTROL:
 	  decSpeedKeyDown=true;
 	  break;
-
   case OIS::KC_CAPITAL:
 	  maxSpeedKeyDown=true;
 	  break;
-
 	}
 
 	return true;
 }
 
+//Some key released stuff
 bool RingFlyerFrameListener::keyReleased(const OIS::KeyEvent& event) {
 	switch (event.key) {
   case OIS::KC_W:
@@ -344,7 +243,6 @@ bool RingFlyerFrameListener::keyReleased(const OIS::KeyEvent& event) {
   case OIS::KC_LCONTROL:
 	  decSpeedKeyDown=false;
 	  break;
-
   case OIS::KC_CAPITAL:
 	  maxSpeedKeyDown=false;
 	  break;

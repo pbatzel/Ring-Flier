@@ -15,8 +15,7 @@ class Ship;
 
 class RingFlyer {
 	
- private:
-	 
+ private:	 
   RingFlyerFrameListener* frameListener;
   Ogre::Root*               root;
   Ogre::SceneManager*       sceneManager;
@@ -26,34 +25,25 @@ class RingFlyer {
   Ogre::Ray                 terrainRay;
   Level*					level;
   SoundManager*			    soundMgr;
-  //Ogre::Overlay*     mPanelOverlay;
-
-
-
 
  public:
   RingFlyer();
 
   ~RingFlyer();
-Ogre::Camera*             camera;
+  Ogre::Camera*             camera;
   Ogre::Root*         getRoot()         { return root; }
   Ogre::SceneManager* getSceneManager() { return sceneManager; }
   Ogre::RenderWindow* getRenderWindow() { return renderWindow; }
   Ogre::Camera*       getCamera()       { return camera; }
   Ring **e;
-    Ship*						ship;
-	Ogre::SceneNode *cameraNode;
+  Ship*	ship;
+  Ogre::SceneNode *cameraNode;
 	
   float getTerrainHeightAt(float x, float y);
-
   void adjustCameraHeightToTerrain();
-
   void createNextLevel(int Level);
-
   void createRings(int n);
-
   void destroyRings(int n);
-
   Ogre::Vector3 getShipPosition();
 
   void init();
