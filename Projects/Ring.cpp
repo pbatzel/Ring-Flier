@@ -6,8 +6,10 @@ const float Ring::CHASE_VELOCITY=0.50f;
 const float Ring::ACTIVATION_RADIUS=30.0f;
 const float Ring::RELAX_TIME=3;
 const float Ring::KILL_RADIUS=500.0f;
+
 Ring::Ring(Ogre::String name, RingFlyer* flyer):flyer(flyer)
 {
+	check=true;
 	//std::cout << "inside new ring"<< std::endl;
 	position.x=(rand()%5000);
 	
@@ -32,6 +34,9 @@ Ring::Ring(Ogre::String name, RingFlyer* flyer):flyer(flyer)
 		sn->setDirection(rand()%10,rand()%10,rand()%10,Ogre::Node::TransformSpace::TS_LOCAL,Ogre::Vector3::NEGATIVE_UNIT_Z);
 		sphereName=name;
 		chaseTime=0.0;
+		Ogre::ParticleSystem* pSysRing = flyer->getSceneManager()->createParticleSystem(sphereName+'p',"PEExamples/ringShimmer");
+		flyer->getSceneManager()->getSceneNode("sn"+sphereName)->attachObject(pSysRing);
+		
 }
 
 Ring::~Ring(void)
@@ -61,24 +66,22 @@ void Ring::moveTowards(const Ogre::Vector3 pos, float velocity, float elapsedTim
 	flyer->getSceneManager()->getSceneNode(nodeName)->setPosition(position);
 }
 
-bool Ring::update(float elapsedTime){
+int Ring::update(float elapsedTime){
+	if (this->check){
 	if (Ring::inRange(flyer->getSceneManager()->getSceneNode("shipNode")->getPosition(),Ring::ACTIVATION_RADIUS)){
-		//Ring::moveTowards(flyer->getCamera()->getPosition(),Ring::CHASE_VELOCITY,elapsedTime);
-		//Ring::chaseTime=Ring::RELAX_TIME;
+
 		flyer->getSceneManager()->getEntity(sphereName)->setMaterialName("Active_Sphere");
-		//std::cout << "DEATH "<<sphereName<< std::endl;
+		this->check=false;
+
+		flyer->scoreEffect();
+		flyer->getSceneManager()->getParticleSystem(sphereName+'p')->getEmitter(0)->setEnabled(false);
+		return 1;
+		
 	}
-	else if(chaseTime>0.0){
-		//Ring::moveTowards(flyer->getCamera()->getPosition(),Ring::CHASE_VELOCITY,elapsedTime);
-		Ring::chaseTime-=elapsedTime;
-		//flyer->getSceneManager()->getEntity(sphereName)->setMaterialName("Relaxing_Sphere");
-	}
-	else{
-		//flyer->getSceneManager()->getEntity(sphereName)->setMaterialName("Inactive_Sphere");
-	}
-	if (Ring::inRange(flyer->getSceneManager()->getSceneNode("shipNode")->getPosition(),Ring::KILL_RADIUS)){
-		//return false;
-	}
-	return true;
+
+	
+	return 0;
+}
+	return 0;
 }
 

@@ -5,6 +5,7 @@
 #define __RING_FLYER_H__
 
 #include "Ogre.h"
+#include "SoundManager.h"
 
 class RingFlyerFrameListener;
 class Level;
@@ -24,6 +25,7 @@ class RingFlyer {
   Ogre::RaySceneQuery*      raySceneQuery;
   Ogre::Ray                 terrainRay;
   Level*					level;
+  SoundManager*			    soundMgr;
   //Ogre::Overlay*     mPanelOverlay;
 
 
@@ -41,6 +43,7 @@ Ogre::Camera*             camera;
   Ring **e;
     Ship*						ship;
 	Ogre::SceneNode *cameraNode;
+	
   float getTerrainHeightAt(float x, float y);
 
   void adjustCameraHeightToTerrain();
@@ -54,7 +57,10 @@ Ogre::Camera*             camera;
   Ogre::Vector3 getShipPosition();
 
   void init();
-
+  void scoreEffect();
+  void deadEffect();
+  void explosion();
+ 
  private:
   bool setup();
 };

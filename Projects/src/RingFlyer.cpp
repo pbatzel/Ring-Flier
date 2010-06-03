@@ -9,10 +9,15 @@
 #include <time.h>
 #include "../Ring.h"
 #include "../Ship.h"
+#include "Ogre.h"
+#include "SoundManager.h"
+//#include "OgreParticleEmitter.h"
 //#include <OgreTextAreaOverlayElement.h>
 //#include <OgreFontManager.h>
 
-
+SoundManager * soundMgr;
+unsigned int audioId;
+unsigned int audioId2;
 RingFlyer::RingFlyer() : root(new Ogre::Root()), frameListener(NULL), raySceneQuery(NULL) {
 	//Ship* ship = new Ship(this);
 	//cameraNode= sceneManager->getRootSceneNode()->createChildSceneNode("cameraNode");
@@ -96,8 +101,8 @@ bool RingFlyer::setup() {
 
 	raySceneQuery = sceneManager->createRayQuery(terrainRay);
 	Ship* ship= new Ship(this);
-
-	cameraNode= sceneManager->getSceneNode("shipNode")->createChildSceneNode("cameraNode",Ogre::Vector3(0.0,0.0,-380.0f));
+	
+	cameraNode= sceneManager->getSceneNode("shipNode")->createChildSceneNode("cameraNode",Ogre::Vector3(0.0,0.0,-700.0f));
 	cameraNode->setAutoTracking(true,sceneManager->getSceneNode("shipNode"));
 	cameraNode->attachObject(camera);
 	//Ogre::Entity* test = sceneManager->createEntity("test","sphere.mesh");
@@ -116,11 +121,56 @@ bool RingFlyer::setup() {
 	//std::cout << hat << std::endl;
 	//ship->setPosition(Ogre::Vector3(hat.x+0.0f,hat.y+0.0f,hat.z-50.0f));
 	//std::cout << ship->getPosition() << std::endl;
-	frameListener = new RingFlyerFrameListener(this,ship);
+	SoundManager * soundMgr;
+		soundMgr = SoundManager::createManager();
+ 
+		std::cout << soundMgr->listAvailableDevices();
+ 
+		soundMgr->init();
+		soundMgr->setAudioPath( (char*) ".\\" );
+ 
+                // Just for testing
+		
+		
+		soundMgr->loadAudio( "ambient1.wav", &audioId, true);
+		std::cout << "audioId: " << audioId << "=ambient1.wav" << std::endl;
+		soundMgr->loadAudio( "Explosion.wav", &audioId2, false);
+		std::cout << "audioId2: " << audioId2 << "=Explosion.wav" << std::endl;
+		soundMgr->playAudio( audioId, false);
+		
+	frameListener = new RingFlyerFrameListener(this,ship,soundMgr);
 
 	root->addFrameListener(frameListener);
 	Level* level = new Level(3,this);
+		Ogre::ParticleSystem* pSysEngine = sceneManager->createParticleSystem("pSysEngine","Examples/JetEngine1");
+		sceneManager->getSceneNode("shipNode")->createChildSceneNode("engineNode",Ogre::Vector3(-8.0f,0.0f,-10.0f));
+	
+	sceneManager->getSceneNode("engineNode")->attachObject(pSysEngine);
+		Ogre::ParticleSystem* pSysScore = sceneManager->createParticleSystem("pSysScore","PEExamples/ringTest");
+sceneManager->getSceneNode("shipNode")->attachObject(sceneManager->getParticleSystem("pSysScore"));
+	sceneManager->getParticleSystem("pSysScore")->getEmitter(0)->setEnabled(false);
+	//Ogre::ParticleSystem* pSysShimmer = sceneManager->createParticleSystem("ringShimmer","PEExamples/ringShimmer");
+	//sceneManager->getSceneNode("testNode2")->attachObject(sceneManager->getParticleSystem("ringShimmer"));
 
+	//pSys->addEmitter("Point");
+	//sceneManager->getRootSceneNode()->createChildSceneNode()->attachObject(sceneManager->createParticleSystem("Fountain", "Examples/PurpleFountain"));
+	
+		sceneManager->getRootSceneNode()->createChildSceneNode("wallNode1",Ogre::Vector3(2500.0f,500.0f,0.0f));
+
+		sceneManager->getRootSceneNode()->createChildSceneNode("wallNode2",Ogre::Vector3(2500.0f,500.0f,5000.0f));
+
+		sceneManager->getRootSceneNode()->createChildSceneNode("wallNode3",Ogre::Vector3(0.0f,500.0f,2500.0f));
+
+		sceneManager->getRootSceneNode()->createChildSceneNode("wallNode4",Ogre::Vector3(5000.0f,500.0f,2500.0f));
+	
+		sceneManager->getRootSceneNode()->createChildSceneNode("rainNode",Ogre::Vector3(2500.0f,2000.0f,2500.0f));
+
+		
+		/*soundMgr->setSoundPosition(audioId,Ogre::Vector3(2500,500,2500));
+		soundMgr->setListenerPosition(camera->getPosition(),Ogre::Vector3(0.0,0.0,0.0),Ogre::Quaternion::IDENTITY);
+        soundMgr->playAudio( audioId,false );*/
+
+				
 	return true;
 }
 void RingFlyer::createRings(int n){
@@ -138,6 +188,8 @@ void RingFlyer::destroyRings(int n){
 	//std::cout << "inside destroyRings"<< std::endl;
 	for (i=0;i<n;i++){
 		sceneManager->getRootSceneNode()->removeAndDestroyChild("sn" + Ogre::StringConverter::toString(i));
+
+	//	delete sceneManager->getParticleSystem(Ogre::StringConverter::toString(i)+"p");
 		//delete e[i];
 		//e[i]->~Ring();
 	}
@@ -155,6 +207,7 @@ void RingFlyer::createNextLevel(int x){
 
 	//sceneManager->getSceneNode("shipNode")->
 	sceneManager->destroyAllEntities();
+	sceneManager->destroyAllParticleSystems();
 		//Ship* ship= new Ship(this);
 	//destroyRings(50);
 	//std::cout << "after destroyAllEnts"<< std::endl;
@@ -167,11 +220,12 @@ void RingFlyer::createNextLevel(int x){
 	//std::cout << "setCameraPos"<< std::endl;
 
 	sceneManager->getRootSceneNode()->removeAndDestroyChild("shipNode");
+	
 	delete ship;
 	//std::cout << "deleted ship"<< std::endl;
 	Ship* ship= new Ship(this);
 	//std::cout << "made a new ship"<< std::endl;
-	cameraNode= sceneManager->getSceneNode("shipNode")->createChildSceneNode("cameraNode",Ogre::Vector3(0.0,0.0,-380.0f));
+	cameraNode= sceneManager->getSceneNode("shipNode")->createChildSceneNode("cameraNode",Ogre::Vector3(0.0,0.0,-700.0f));
 	//std::cout << "make a camera node"<< std::endl;
 	cameraNode->setAutoTracking(true,sceneManager->getSceneNode("shipNode"));
 	//std::cout << "autotrack"<< std::endl;
@@ -183,8 +237,46 @@ void RingFlyer::createNextLevel(int x){
 
 	root->addFrameListener(frameListener);*/
 	frameListener->setShip(ship);
+		Ogre::ParticleSystem* pSysEngine = sceneManager->createParticleSystem("pSysEngine","Examples/JetEngine1");
+		sceneManager->getSceneNode("shipNode")->createChildSceneNode("engineNode",Ogre::Vector3(-8.0f,0.0f,-10.0f));
+	//	sceneManager->getRootSceneNode()->createChildSceneNode("testNode2",Ogre::Vector3(2500.0f,600.0f,2500.0f));
+	sceneManager->getSceneNode("engineNode")->attachObject(pSysEngine);
+		Ogre::ParticleSystem* pSysScore = sceneManager->createParticleSystem("pSysScore","PEExamples/ringTest");
+sceneManager->getSceneNode("shipNode")->attachObject(sceneManager->getParticleSystem("pSysScore"));
+	sceneManager->getParticleSystem("pSysScore")->getEmitter(0)->setEnabled(false);
+	
 
+		//std::cout << "attempting to load ambient1.wav!!!!!!!!!!!!!!!!" << std::endl;
+		//unsigned int tempId;
+		//soundMgr->stopAllAudio(); //why WHY don't you work?!
+		//soundMgr->loadAudio( "ambient1.wav", &tempId, true);
+		//std::cout << "audioId: " << audioId << "=ambient1.wav" << std::endl;
+		//soundMgr->loadAudio( "Explosion.wav", &audioId2, false);
+		//std::cout << "audioId2: " << audioId2 << "=Explosion.wav" << std::endl;
+		//soundMgr->playAudio( tempId, false);
 }
 Ogre::Vector3 RingFlyer::getShipPosition(){
 	return RingFlyer::ship->getPosition();
 }
+void RingFlyer::scoreEffect(){
+
+
+	sceneManager->getParticleSystem("pSysScore")->getEmitter(0)->setEnabled(true);
+	
+
+}
+void RingFlyer::deadEffect(){
+
+	Ogre::ParticleSystem* pSysDead1 = sceneManager->createParticleSystem("pSysDead1","PEExamples/shipFlame");
+	Ogre::ParticleSystem* pSysDead2 = sceneManager->createParticleSystem("pSysDead2","Examples/Smoke");
+	sceneManager->getSceneNode("shipNode")->attachObject(sceneManager->getParticleSystem("pSysDead1"));
+	sceneManager->getSceneNode("shipNode")->attachObject(sceneManager->getParticleSystem("pSysDead2"));
+		
+}
+void RingFlyer::explosion(){
+Ogre::ParticleSystem* pSysExpl = sceneManager->createParticleSystem("pSysExpl","PEExamples/shipExpl");
+	sceneManager->getSceneNode("shipNode")->attachObject(sceneManager->getParticleSystem("pSysExpl"));
+}
+/*void RingFlyer::stopAmbient(){
+	soundMgr->stopAudio();
+}*/
