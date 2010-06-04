@@ -13,15 +13,15 @@
 #include "SoundManager.h"
 
 //Sound globals
-#define NUM_BUFFERS 16
-#define NUM_SOURCES 16
+#define NUM_BUFFERS 50
+#define NUM_SOURCES 50
 #define NUM_ENVIRONMENTS 1
 
-ALfloat listenerPos[]={0.0,0.0,20.0};
+ALfloat listenerPos[]={500.0,500.0,500.0};
 ALfloat listenerVel[]={0.0,0.0,0.0};
 ALfloat	listenerOri[]={0.0,0.0,1.0, 0.0,1.0,0.0};
 
-ALfloat source0Pos[]={ 0.0, 0.0, 4.0};
+ALfloat source0Pos[]={ 500.0, 500.0, 500.0};
 ALfloat source0Vel[]={ 0.0, 0.0, 0.0};
 
 
@@ -34,6 +34,7 @@ ALfloat source2Vel[]={ 0.0, 0.0, 0.0};
 ALuint	buffer[NUM_BUFFERS];
 ALuint	source[NUM_SOURCES];
 ALuint  environment[NUM_ENVIRONMENTS];
+ALboolean ALtrue;
 int 	GLwin;
 
 ALsizei size,freq;
@@ -44,6 +45,67 @@ int 	ch;
 
 
 RingFlier::RingFlier() : root(new Ogre::Root()), frameListener(NULL), raySceneQuery(NULL) {
+}
+
+void RingFlier::setSourcePos(int sourceNum, float xpos, float ypos, float zpos){
+	ALfloat tempPos[] = {xpos, ypos, zpos};
+	ALfloat tempVel[] = {0.0, 0.0, 0.0};
+
+	alutLoadWAVFile("ring1.wav",&format,&data,&size,&freq,&ALtrue);
+    alBufferData(buffer[sourceNum],format,data,size,freq);
+    alutUnloadWAV(format,data,size,freq);
+
+	alSourcef(source[sourceNum],AL_PITCH,1.0f);
+    alSourcef(source[sourceNum],AL_GAIN,1.0f);
+	alSourcef(source[sourceNum],AL_ROLLOFF_FACTOR, 20.0f);
+	alSourcef(source[sourceNum],AL_MAX_DISTANCE, 5000.0f);
+    alSourcefv(source[sourceNum],AL_POSITION,tempPos);
+    alSourcefv(source[sourceNum],AL_VELOCITY,tempVel);
+    alSourcei(source[sourceNum],AL_BUFFER,buffer[sourceNum]);
+    alSourcei(source[sourceNum],AL_LOOPING,AL_TRUE);
+
+	alGetError(); /* clear error */
+    //alGenSources(NUM_SOURCES, source);
+
+    if(alGetError() != AL_NO_ERROR) 
+    {
+        printf("- Error creating sources !!\n");
+        exit(2);
+    }
+    else
+    {
+        printf("init - no errors after alGenSources\n");
+    }
+
+}
+
+void RingFlier::setListenerPos(float xpos, float ypos, float zpos){
+	ALfloat tempPos[] = {xpos, ypos, zpos};
+//	ALfloat tempPos[] = {500, 500, 500};
+	ALfloat tempVel[] = {0.0, 0.0, 0.0};
+	Ogre::Vector3 tempy, tempz;
+	ALfloat tempOrient[] = {0.0, 0.0, 0.0,   0.0, 0.0, 0.0};	
+    
+	Ogre::Quaternion tempQuat = sceneManager->getSceneNode("shipNode")->getOrientation();
+	//tempx = tempQuat.xAxis();
+	tempy = tempQuat.yAxis();
+	tempz = tempQuat.zAxis();
+
+	tempOrient[0] = tempz.x;
+	tempOrient[1] = tempz.y;
+	tempOrient[2] = tempz.z;
+
+	tempOrient[3] = 0.0;
+	tempOrient[4] = tempy.y;
+	tempOrient[5] = 0.0;
+
+	alListenerfv(AL_ORIENTATION,tempOrient);
+	alListenerfv(AL_POSITION,tempPos);
+    alListenerfv(AL_VELOCITY,tempVel);
+
+	std::cout << "x:" <<xpos << " y:" << ypos <<" z:" << zpos << std::endl;
+	//std::cout << "x:" <<tempPos[0] << " y:" << tempPos[1] <<" z:" << tempPos[2] << std::endl;
+
 }
 
 RingFlier::~RingFlier() {
@@ -119,6 +181,106 @@ bool RingFlier::setup() {
 
 	terrainRay.setDirection(Ogre::Vector3::NEGATIVE_UNIT_Y);
 	raySceneQuery = sceneManager->createRayQuery(terrainRay);
+
+
+
+
+
+
+//sound init
+	alutInit(0, NULL);
+
+    alListenerfv(AL_POSITION,listenerPos);
+    alListenerfv(AL_VELOCITY,listenerVel);
+    alListenerfv(AL_ORIENTATION,listenerOri);
+    
+    alGetError(); // clear any error messages
+    
+    if(alGetError() != AL_NO_ERROR) 
+    {
+        printf("- Error creating buffers !!\n");
+        exit(1);
+    }
+    else
+    {
+        printf("init() - No errors yet.");
+
+    }
+    
+    // Generate buffers, or else no sound will happen!
+    alGenBuffers(NUM_BUFFERS, buffer);
+	
+    
+	
+/*
+    alutLoadWAVFile("Explosion.wav",&format,&data,&size,&freq, &ALtrue);
+    alBufferData(buffer[1],format,data,size,freq);
+    alutUnloadWAV(format,data,size,freq);
+
+    alutLoadWAVFile("ring1.wav",&format,&data,&size,&freq,&ALtrue);
+    alBufferData(buffer[0],format,data,size,freq);
+    alutUnloadWAV(format,data,size,freq);
+
+	alutLoadWAVFile("beep.wav",&format,&data,&size,&freq,&ALtrue);
+
+    //alutLoadWAVFile("beep.wav",&format,&data,&size,&freq);
+    alBufferData(buffer[2],format,data,size,freq);
+    alutUnloadWAV(format,data,size,freq);
+*/
+    alGetError(); /* clear error */
+    alGenSources(NUM_SOURCES, source);
+
+    if(alGetError() != AL_NO_ERROR) 
+    {
+        printf("- Error creating sources !!\n");
+        exit(2);
+    }
+    else
+    {
+        printf("init - no errors after alGenSources\n");
+    }
+/*
+    alSourcef(source[0],AL_PITCH,1.0f);
+    alSourcef(source[0],AL_GAIN,1.0f);
+	alSourcef(source[0],AL_ROLLOFF_FACTOR, 1.0f);
+	alSourcef(source[0],AL_MAX_DISTANCE, 5000000.0f);
+    alSourcefv(source[0],AL_POSITION,source0Pos);
+    alSourcefv(source[0],AL_VELOCITY,source0Vel);
+    alSourcei(source[0],AL_BUFFER,buffer[0]);
+    alSourcei(source[0],AL_LOOPING,AL_TRUE);
+
+    alSourcef(source[1],AL_PITCH,1.0f);
+    alSourcef(source[1],AL_GAIN,1.0f);
+    alSourcefv(source[1],AL_POSITION,source1Pos);
+    alSourcefv(source[1],AL_VELOCITY,source1Vel);
+    alSourcei(source[1],AL_BUFFER,buffer[1]);
+    alSourcei(source[1],AL_LOOPING,AL_TRUE);
+
+    alSourcef(source[2],AL_PITCH,1.0f);
+    alSourcef(source[2],AL_GAIN,1.0f);
+    alSourcefv(source[2],AL_POSITION,source2Pos);
+    alSourcefv(source[2],AL_VELOCITY,source2Vel);
+    alSourcei(source[2],AL_BUFFER,buffer[2]);
+    alSourcei(source[2],AL_LOOPING,AL_TRUE);*/
+
+
+	alDistanceModel(AL_LINEAR_DISTANCE);
+
+	//alSourcePlay(source[0]);
+	//alSourcePlay(source[1]);
+	//alSourcePlay(source[2]);
+//end sound init
+
+
+
+
+
+
+
+
+
+
+
 	
 	Ship* ship= new Ship(this);
 
@@ -165,89 +327,7 @@ bool RingFlier::setup() {
 	soundMgr->playAudio( audioId,false );
 	*/
 
-//sound init
-	alutInit(0, NULL);
 
-    alListenerfv(AL_POSITION,listenerPos);
-    alListenerfv(AL_VELOCITY,listenerVel);
-    alListenerfv(AL_ORIENTATION,listenerOri);
-    
-    alGetError(); // clear any error messages
-    
-    if(alGetError() != AL_NO_ERROR) 
-    {
-        printf("- Error creating buffers !!\n");
-        exit(1);
-    }
-    else
-    {
-        printf("init() - No errors yet.");
-
-    }
-    
-    // Generate buffers, or else no sound will happen!
-    alGenBuffers(NUM_BUFFERS, buffer);
-	ALboolean ALtrue;
-    
-	
-
-    alutLoadWAVFile("Explosion.wav",&format,&data,&size,&freq, &ALtrue);
-    alBufferData(buffer[1],format,data,size,freq);
-    alutUnloadWAV(format,data,size,freq);
-
-    alutLoadWAVFile("ring1.wav",&format,&data,&size,&freq,&ALtrue);
-    alBufferData(buffer[0],format,data,size,freq);
-    alutUnloadWAV(format,data,size,freq);
-
-	alutLoadWAVFile("beep.wav",&format,&data,&size,&freq,&ALtrue);
-
-    //alutLoadWAVFile("beep.wav",&format,&data,&size,&freq);
-    alBufferData(buffer[2],format,data,size,freq);
-    alutUnloadWAV(format,data,size,freq);
-
-    alGetError(); /* clear error */
-    alGenSources(NUM_SOURCES, source);
-
-    if(alGetError() != AL_NO_ERROR) 
-    {
-        printf("- Error creating sources !!\n");
-        exit(2);
-    }
-    else
-    {
-        printf("init - no errors after alGenSources\n");
-    }
-
-    alSourcef(source[0],AL_PITCH,1.0f);
-    alSourcef(source[0],AL_GAIN,1.0f);
-	//alSourcef(source[0],AL_ROLLOFF_FACTOR, 1.0f);
-	alSourcef(source[0],AL_MAX_DISTANCE, 5000000.0f);
-    alSourcefv(source[0],AL_POSITION,source0Pos);
-    alSourcefv(source[0],AL_VELOCITY,source0Vel);
-    alSourcei(source[0],AL_BUFFER,buffer[0]);
-    alSourcei(source[0],AL_LOOPING,AL_TRUE);
-
-    alSourcef(source[1],AL_PITCH,1.0f);
-    alSourcef(source[1],AL_GAIN,1.0f);
-    alSourcefv(source[1],AL_POSITION,source1Pos);
-    alSourcefv(source[1],AL_VELOCITY,source1Vel);
-    alSourcei(source[1],AL_BUFFER,buffer[1]);
-    alSourcei(source[1],AL_LOOPING,AL_TRUE);
-
-    alSourcef(source[2],AL_PITCH,1.0f);
-    alSourcef(source[2],AL_GAIN,1.0f);
-    alSourcefv(source[2],AL_POSITION,source2Pos);
-    alSourcefv(source[2],AL_VELOCITY,source2Vel);
-    alSourcei(source[2],AL_BUFFER,buffer[2]);
-    alSourcei(source[2],AL_LOOPING,AL_TRUE);
-
-
-	//alDistanceModel(AL_LINEAR_DISTANCE);
-
-	alSourcePlay(source[0]);
-	//alSourcePlay(source[1]);
-	//alSourcePlay(source[2]);
-//end sound init
 
 
 
@@ -260,6 +340,11 @@ void RingFlier::createRings(int n){
 	e=new Ring*[n];
 	for (i=0;i<n;i++){
 		e[i]=new Ring(Ogre::StringConverter::toString(i),this);
+		//setSourcePos(i, sceneManager->getSceneNode("sn"+ e[i]->ringName)->getPosition().x,sceneManager->getSceneNode("sn"+ e[i]->ringName)->getPosition().y, sceneManager->getSceneNode("sn"+ e[i]->ringName)->getPosition().z);
+		setSourcePos(i, e[i]->position.x, e[i]->position.y, e[i]->position.z);
+		//std::cout << e[i]->position.x<<" "<< e[i]->position.y<<" "<< e[i]->position.z <<"\n";
+		std::cout << "SLDKFJKLGDJHGS "<< i << "\n";
+		alSourcePlay(source[i]);
 	}
 }
 void RingFlier::destroyRings(int n){

@@ -37,6 +37,8 @@ public:
 	Ogre::SceneNode *cameraNode;
 	Ogre::Vector3 getShipPosition();
 
+	void setSourcePos(int sourceNum, float xpos, float ypos, float zpos);
+	void setListenerPos(float xpos, float ypos, float zpos);
 	float getTerrainHeightAt(float x, float y);
 	void adjustCameraHeightToTerrain();
 	void createNextLevel(int Level);

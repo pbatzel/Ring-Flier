@@ -11,9 +11,10 @@ private:
 	bool check;
 	bool inRange(const Ogre::Vector3 pos, float r) const;
 	Ogre::String ringName;
-	Ogre::Vector3 position;
+	//Ogre::Vector3 position;
 	RingFlier*  flier;
 public:
+	Ogre::Vector3 position;
 	Ring(Ogre::String name, RingFlier* flier);
 	~Ring(void);
 
