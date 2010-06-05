@@ -23,7 +23,6 @@ Ship::~Ship(void)
 void Ship::setPosition(Ogre::Vector3 position){
 	shipPosition=position;
 	flier->getSceneManager()->getSceneNode(nodeName)->translate(flier->getSceneManager()->getSceneNode(nodeName)->getLocalAxes(),position,Ogre::Node::TS_PARENT);
-
 }
 
 void Ship::setOrientation(float pitch,float roll){
@@ -33,10 +32,7 @@ void Ship::setOrientation(float pitch,float roll){
 
 Ogre::Vector3 Ship::getPosition(){
 	Ogre::Vector3 nodePosition = flier->getSceneManager()->getSceneNode(nodeName)->getPosition();
-		flier->setListenerPos(nodePosition.x,nodePosition.y,nodePosition.z);
-	//std::cout << "x:" <<nodePosition.x << " y:" << nodePosition.y <<" z:" << nodePosition.z << std::endl;
-	
-	
+	flier->setListenerPos(nodePosition.x,nodePosition.y,nodePosition.z);	
 	return nodePosition;
 	
 }

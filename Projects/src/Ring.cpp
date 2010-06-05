@@ -3,7 +3,6 @@
 #include "Ogre.h"
 
 const float Ring::ACTIVATION_RADIUS=30.0f;
-//Ogre::Vector3 position;
 Ring::Ring(Ogre::String name, RingFlier* flier):flier(flier)
 {
 	check=true;
@@ -11,9 +10,6 @@ Ring::Ring(Ogre::String name, RingFlier* flier):flier(flier)
 	position.x=(rand()%5000);
 	position.z=(rand()%5000);
 	position.y=(rand()%700)+flier->getTerrainHeightAt(position.x,position.z)+100.0f;
-	//position.x=500;
-	//position.y=500;
-	//position.z=500;
 
 	Ogre::SceneNode* sn = flier->getSceneManager()->getRootSceneNode()->createChildSceneNode("sn"+name);
 	Ogre::Entity* ring = flier->getSceneManager()->createEntity(name,"Torus.mesh");

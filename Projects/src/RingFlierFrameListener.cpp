@@ -1,6 +1,3 @@
-// RingFlierFrameListener.cpp
-
-
 #include "RingFlierFrameListener.h"
 #include "RingFlier.h"
 #include "Ring.h"
@@ -57,6 +54,9 @@ bool RingFlierFrameListener::frameStarted(const Ogre::FrameEvent& event) {
 	if(timeLeft<=0.0f){
 		dead=true;
 	}
+	else if(timeLeft <= 10.0f){
+		flier->clockSound();
+	}
 
 	if(!dead){
 		timeLeft-=dt;
@@ -76,10 +76,8 @@ bool RingFlierFrameListener::frameStarted(const Ogre::FrameEvent& event) {
 			roll+=ROTATION_INCREMENT*dt;
 		}
 		ship->setOrientation(cameraPitch,roll);
-
 			cameraPitch=0.0f;
 			roll=0.0f;
-			//frameShipPosition=ship->getPosition();
 			ship->setPosition(Ogre::Vector3(0.0f,0.0f,FORWARD_VELOCITY*dt));
 			frameShipPosition=ship->getPosition();
 	if ((frameShipPosition.x<0||frameShipPosition.x>5000||frameShipPosition.z<0||frameShipPosition.z>5000) &&(level%3)!=0){

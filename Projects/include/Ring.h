@@ -1,4 +1,3 @@
-//#pragma once
 #ifndef __RING_H__
 #define __RING_H__
 #include "Ogre.h"
@@ -11,7 +10,6 @@ private:
 	bool check;
 	bool inRange(const Ogre::Vector3 pos, float r) const;
 	Ogre::String ringName;
-	//Ogre::Vector3 position;
 	RingFlier*  flier;
 public:
 	Ogre::Vector3 position;

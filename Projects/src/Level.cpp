@@ -36,15 +36,11 @@ Level::Level(int x, RingFlier* flier)//:flier(flier)
 		light->setPosition(20.0f, 80.0f, 50.0f);
 		Ogre::ColourValue fogColor(0.93f, 0.86f, 0.76f);
 		flier->getSceneManager()->setFog(Ogre::FOG_EXP, fogColor, 0.00001f, 20.0f, 300.0f);
-
 		flier->createRings(100);
 
 		////Rain
 		Ogre::ParticleSystem* pSysRain = flier->getSceneManager()->createParticleSystem("pSysRain","Examples/Rain");
-		//pSysRain->fastForward(Ogre::Real(17), Ogre::Real(0.100000));
 		flier->getSceneManager()->getSceneNode("rainNode")->attachObject(flier->getSceneManager()->getParticleSystem("pSysRain"));
-		//pSysRain->fastForward(Ogre::Real(3), Ogre::Real(.05));
-
 
 		//////////////Make Level Walls////////////////////
 		Ogre::ParticleSystem* pSysWall1 = flier->getSceneManager()->createParticleSystem("pSysWall1","PEExamples/wall1");
@@ -82,12 +78,9 @@ Level::Level(int x, RingFlier* flier)//:flier(flier)
 
 		Ogre::ParticleSystem* pSysWall4 = flier->getSceneManager()->createParticleSystem("pSysWall4","PEExamples/wall2");
 		flier->getSceneManager()->getSceneNode("wallNode4")->attachObject(flier->getSceneManager()->getParticleSystem("pSysWall4"));
-
-
 	}
 }
 
 Level::~Level(void)
 {
-	//delete this;
 }
